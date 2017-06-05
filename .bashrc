@@ -202,9 +202,6 @@ export MORE="-c"
 export PAGER=less
 umask 007
 
-#### Special - remove backspace editing error
-stty erase '^?'
-
 ############################################################
 # here we figure out which OS we're running on and make
 # appropriate settings.  Our goal here is to keep the
