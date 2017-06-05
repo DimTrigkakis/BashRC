@@ -3,7 +3,7 @@
 #######################
 # Custom bash interface
 
-echo Type helpme to be given all the custom commands
+echo "Type helpme for a list of custom commands"
 
 finder() {
 	find . -name $1
