@@ -5,6 +5,18 @@
 
 echo "Type helpme for a list of custom commands"
 
+# Set up different bash file for desktop and server
+
+export LOCATION="HOME"
+# export LOCATION="SERVER"
+
+if [ "$LOCATION" = "HOME" ]; then
+
+helpme() {
+	echo export DEEP_FRAMEWORK=[choices include Pytorch]
+	echo commands: open_pdf, restart_bisque, kill_port, timeme, connect, ssh_connect, relocate,  finder, dir_finder, r, cj, extract, activate
+}
+
 open_pdf()
 { 
 	if [ -d $1 ]
@@ -22,7 +34,6 @@ open_pdf()
 	fi
 
 }
-
 
 restart_bisque() {
 	
@@ -42,6 +53,31 @@ kill_port() {
 	lsof -i tcp:${PORT_NUMBER} | awk 'NR!=1 {print $2}' | xargs kill 
 }
 
+timeme() {
+	python ~/Sandbox/Timer/timer.py
+}
+
+connect() {
+	sudo openconnect sds.oregonstate.edu
+}
+
+relocate() {
+	cj ~/
+}
+
+else
+
+helpme() {
+	echo export DEEP_FRAMEWORK=[choices include Pytorch]
+	echo commands: ssh_connect, relocate,  finder, dir_finder, r, cj , extract, activate
+}
+
+relocate() {
+	cd /scratch/Dimitris/
+}
+
+fi
+
 finder() {
 	find . -name $1
 }
@@ -54,22 +90,11 @@ r () {
 	source ~/.bashrc
 }
 
-timeme() {
-	python ~/Sandbox/Timer/timer.py
-}
-
-connect() {
-	sudo openconnect sds.oregonstate.edu
-}
 
 sshconnect() {
 	ssh -X trigkakd@gpu-bart.eecs.oregonstate.edu
 }
 
-helpme() {
-	echo export CUDA_SELECT=[choices include Tensorflow, 7.0, 7.5, Caffe]
-	echo commands: cj, finder, dfinder, extract, helpme, ..,
-}
 
 alias ..="cd ..; ls"
 alias ...="cd ../..; ls"
@@ -114,39 +139,40 @@ activate ()
 	source $1/bin/activate
 }
 
-relocate() {
-	cd /scratch/Dimitris/
-}
 
 function init () {
     
-	python -c 'import sys; print sys.real_prefix;' 2>/dev/null && INVENV=1 || INVENV=0
-	python -c 'print "\r"'
-
-	if [ "$INVENV" = "1" ]; then
-		echo Deactivating previous virtual environment
-		deactivate
-	fi
-
-	echo Using: $DEEP_FRAMEWORK, Enabling my custom bash environment, Error correction enabled
-    shopt -s cdspell
-
     if [ ! "$(bash -c 'echo ${DEEP_FRAMEWORK}')" ]; then
 		export DEEP_FRAMEWORK="Pytorch"
 	fi
+
+	echo Using: $DEEP_FRAMEWORK, enabling my custom bash environment, error correction enabled
+    shopt -s cdspell
 
 }
 
 init
 
-if [ "$DEEP_FRAMEWORK" = "Pytorch" ]; then
+if [ "$LOCATION" = "HOME" ]; then
 
-	activate /scratch/Dimitris/software/pytorch/pytorchenv
-	export LD_LIBRARY_PATH=/scratch/Dimitris/libs/cudnn/cudnn-5.1/lib64:/usr/local/apps/cuda/cuda-8.0/lib64:
-    #export LD_LIBRARY_PATH=/scratch/test/lib/python2.7/site-packages
-    #export LD_LIBRARY_PATH=/scratch/datasets/NFLvid/pycv/usr/local/lib
-	export CUDA_HOME=/usr/local/apps/cuda/cuda-8.0/
+    if [ "$DEEP_FRAMEWORK" = "Pytorch" ]; then
 
+	    activate ~/Research/pytorch/penv
+	    export LD_LIBRARY_PATH=~/Research/cuda/lib64
+	    export CUDA_HOME=~/Research/cuda
+
+    fi
+
+else
+    if [ "$DEEP_FRAMEWORK" = "Pytorch" ]; then
+
+	    activate /scratch/Dimitris/software/pytorch/pytorchenv
+	    export LD_LIBRARY_PATH=/scratch/Dimitris/libs/cudnn/cudnn-5.1/lib64:/usr/local/apps/cuda/cuda-8.0/lib64:
+        #export LD_LIBRARY_PATH=/scratch/test/lib/python2.7/site-packages
+        #export LD_LIBRARY_PATH=/scratch/datasets/NFLvid/pycv/usr/local/lib
+	    export CUDA_HOME=/usr/local/apps/cuda/cuda-8.0/
+
+    fi
 fi
 
 ##
